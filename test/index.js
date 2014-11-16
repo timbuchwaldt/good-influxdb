@@ -46,10 +46,19 @@ describe('arguments', function () {
     });
 
 
+    it('throws an error when missing host', function (done) {
+
+        expect(function () {
+            var reporter = new GoodInflux("http://user:pass@foo");
+        }).to.throw('events must be an object');
+
+        done();
+    });
+
     it('allows credentials in the host', function (done) {
 
         expect(function () {
-            var reporter = new GoodInflux('http://user:pass@www.github.com');
+            var reporter = new GoodInflux('http://user:pass@www.github.com', {foo: '*'});
         }).to.not.throw();
 
         done();
@@ -59,11 +68,11 @@ describe('arguments', function () {
     it('throws an error on invalid username', function (done) {
 
         expect(function () {
-            var reporter = new GoodInflux('http://www.github.com');
+            var reporter = new GoodInflux('http://www.github.com', {});
         }).to.throw('username must be a string');
 
         expect(function () {
-            var reporter = new GoodInflux('http://www.github.com', { username: 42 });
+            var reporter = new GoodInflux('http://www.github.com', {},  { username: 42 });
         }).to.throw('username must be a string');
 
         done();
@@ -73,11 +82,11 @@ describe('arguments', function () {
     it('throws an error on invalid password', function (done) {
 
         expect(function () {
-            var reporter = new GoodInflux('http://www.github.com', { username: '' });
+            var reporter = new GoodInflux('http://www.github.com',{}, { username: '' });
         }).to.throw('password must be a string');
 
         expect(function () {
-            var reporter = new GoodInflux('http://www.github.com', { username: '', password: 42 });
+            var reporter = new GoodInflux('http://www.github.com',{} , { username: '', password: 42 });
         }).to.throw('password must be a string');
 
         done();
@@ -91,7 +100,7 @@ describe('credentials', function () {
     it('extracts username and password', function (done) {
         var reporter, settings;
 
-        reporter = new GoodInflux('http://user:pass@github.com');
+        reporter = new GoodInflux('http://user:pass@github.com', {});
         settings = reporter._settings;
 
         expect(settings.username).to.not.exist;
@@ -105,7 +114,7 @@ describe('credentials', function () {
     it('overrides username and password with host auth', function (done) {
         var reporter, settings;
 
-        reporter = new GoodInflux('http://user:pass@github.com', { username: 'foo', password: 'bar' });
+        reporter = new GoodInflux('http://user:pass@github.com',{} , { username: 'foo', password: 'bar' });
         settings = reporter._settings;
 
         expect(settings.username).to.not.exist;
@@ -119,7 +128,7 @@ describe('credentials', function () {
     it('allows username and password config options', function (done) {
         var reporter, settings;
 
-        reporter = new GoodInflux('http://github.com', { username: 'user', password: 'pass' });
+        reporter = new GoodInflux('http://github.com',{}, { username: 'user', password: 'pass' });
         settings = reporter._settings;
 
         expect(settings.username).to.not.exist;
@@ -163,13 +172,10 @@ describe('report', function () {
 
         server.start(function () {
 
-            reporter = new GoodInflux(server.info.uri, {
+            reporter = new GoodInflux(server.info.uri, {log: '*'}, {
                 threshold: 5,
                 username: 'foo',
-                password: 'bar',
-                events: {
-                    log: '*'
-                }
+                password: 'bar'
             });
 
             reporter.start(ee, function (err) {
@@ -214,13 +220,10 @@ describe('report', function () {
         });
 
         server.start(function () {
-            reporter = new GoodInflux(server.info.uri, {
+            reporter = new GoodInflux(server.info.uri,{log: '*'}, {
                 threshold: 0,
                 username: 'foo',
-                password: 'bar',
-                events: {
-                    log: '*'
-                }
+                password: 'bar'
             });
 
             reporter.start(ee, function (err) {
@@ -286,14 +289,10 @@ describe('report', function () {
         });
 
         server.start(function () {
-            reporter = new GoodInflux(server.info.uri, {
+            reporter = new GoodInflux(server.info.uri,{log: '*', foo: '*'}, {
                 threshold: 0,
                 username: 'foo',
-                password: 'bar',
-                events: {
-                    log: '*',
-                    foo: '*'
-                }
+                password: 'bar'
             });
 
             reporter.start(ee, function (err) {
@@ -437,16 +436,15 @@ describe('report', function () {
         });
 
         server.start(function () {
-            reporter = new GoodInflux(server.info.uri, {
+            reporter = new GoodInflux(server.info.uri,{
+                request: '*',
+                ops: '*',
+                log: '*',
+                error: '*'
+            }, {
                 threshold: 0,
                 username: 'foo',
                 password: 'bar',
-                events: {
-                    request: '*',
-                    ops: '*',
-                    log: '*',
-                    error: '*'
-                }
             });
 
             reporter.start(ee, function (err) {
@@ -491,13 +489,10 @@ describe('stop()', function () {
         });
 
         server.start(function () {
-            reporter = new GoodInflux(server.info.uri, {
+            reporter = new GoodInflux(server.info.uri,{log: '*'}, {
                 threshold: 6,
                 username: 'foo',
-                password: 'bar',
-                events: {
-                    log: '*'
-                }
+                password: 'bar'
             });
 
             reporter.start(ee, function (err) {
@@ -517,6 +512,3 @@ describe('stop()', function () {
     });
 
 });
-
-
-
